@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\FloodController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Endpoint untuk menerima data dari ESP32/Alat IoT
+// URL aksesnya nanti: http://domain-kamu.com/api/update-sensor
+Route::post('/update-sensor', [FloodController::class, 'storeApi']);
