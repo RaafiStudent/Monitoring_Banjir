@@ -1,14 +1,15 @@
 <?php
 
 use App\Http\Controllers\FloodController;
+use App\Http\Controllers\DashboardController; // Tambahkan baris ini
 use Illuminate\Support\Facades\Route;
 
-// Halaman Landing Page Utama (Bisa diakses tanpa login)
+// Halaman Landing Page Utama (Publik)
 Route::get('/', [FloodController::class, 'index'])->name('home');
 
-// Route bawaan Breeze (Halaman Admin, wajib login)
-Route::get('/dashboard-admin', function () {
-    return view('dashboard'); // Pastikan nanti kamu punya view dashboard khusus admin jika ini dipakai
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Halaman Dashboard Admin BPBD (Wajib Login)
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 require __DIR__.'/auth.php';
