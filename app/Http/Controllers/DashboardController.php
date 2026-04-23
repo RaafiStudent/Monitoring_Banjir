@@ -24,6 +24,6 @@ class DashboardController extends Controller
             'avg_level' => round(SensorData::avg('water_level') ?? 0, 1),
         ];
 
-        return view('dashboard', compact('latestData', 'logs', 'stats'));
+        return view('admin.dashboard', compact('latestData', 'logs', 'stats'));
     }
 }
