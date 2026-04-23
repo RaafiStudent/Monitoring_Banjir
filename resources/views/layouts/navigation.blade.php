@@ -18,7 +18,11 @@
                     </x-nav-link>
                     
                     <x-nav-link :href="route('contacts.index')" :active="request()->routeIs('contacts.index')" class="text-slate-300 hover:text-cyan-400 hover:border-cyan-400">
-                    {{ __('Manajemen Kontak') }}
+                        {{ __('Manajemen Kontak') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('threshold.index')" :active="request()->routeIs('threshold.index')" class="text-slate-300 hover:text-cyan-400 hover:border-cyan-400">
+                        {{ __('Ambang Batas') }}
                     </x-nav-link>
                 </div>
             </div>
