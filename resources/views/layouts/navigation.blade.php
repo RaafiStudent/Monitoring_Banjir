@@ -12,8 +12,13 @@
                 </div>
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-slate-300 hover:text-cyan-400 hover:border-cyan-400">
                         {{ __('Command Center') }}
+                    </x-nav-link>
+                    
+                    <x-nav-link :href="route('contacts.index')" :active="request()->routeIs('contacts.index')" class="text-slate-300 hover:text-cyan-400 hover:border-cyan-400">
+                    {{ __('Manajemen Kontak') }}
                     </x-nav-link>
                 </div>
             </div>
