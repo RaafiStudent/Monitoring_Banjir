@@ -14,6 +14,17 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            // WAJIB DITAMBAHKAN AGAR WARNA GELAPNYA MUNCUL
+            colors: {
+                brand: {
+                    50: '#f0f9ff',
+                    100: '#e0f2fe',
+                    600: '#0284c7', 
+                    700: '#0369a1',
+                    900: '#0c4a6e',
+                    950: '#111827', // Ini kode warna gelap persis di fotomu
+                }
+            }
         },
     },
 
