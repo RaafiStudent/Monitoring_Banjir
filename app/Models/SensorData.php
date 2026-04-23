@@ -9,7 +9,7 @@ class SensorData extends Model
 {
     use HasFactory;
 
-    // Tambahkan baris di bawah ini:
+    // Ini adalah kunci agar tidak error MassAssignmentException
     protected $fillable = [
         'water_level',
         'rain_status',
