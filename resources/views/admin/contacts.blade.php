@@ -23,16 +23,16 @@
                         @csrf
                         <div class="mb-5">
                             <label class="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Nama Lengkap</label>
-                            <input type="text" name="name" required class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-xl focus:ring-cyan-500 focus:border-cyan-500 p-3" placeholder="Contoh: Budi Santoso">
+                            <input type="text" name="name" required class="w-full bg-white border border-slate-300 text-slate-950 font-bold placeholder:text-slate-400 placeholder:font-normal rounded-xl focus:ring-cyan-500 focus:border-cyan-500 p-3 shadow-inner" placeholder="Contoh: Budi Santoso">
                         </div>
                         <div class="mb-5">
                             <label class="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Nomor WhatsApp</label>
-                            <input type="text" name="phone_number" required class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-xl focus:ring-cyan-500 focus:border-cyan-500 p-3" placeholder="Contoh: 08123456789">
+                            <input type="text" name="phone_number" required class="w-full bg-white border border-slate-300 text-slate-950 font-bold placeholder:text-slate-400 placeholder:font-normal rounded-xl focus:ring-cyan-500 focus:border-cyan-500 p-3 shadow-inner" placeholder="Contoh: 08123456789">
                             <p class="text-[10px] text-slate-500 mt-1">Gunakan awalan 08 atau 62.</p>
                         </div>
                         <div class="mb-8">
                             <label class="block text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Peran / Posisi</label>
-                            <select name="role" class="w-full bg-slate-800/50 border border-slate-700 text-white rounded-xl focus:ring-cyan-500 focus:border-cyan-500 p-3">
+                            <select name="role" class="w-full bg-white border border-slate-300 text-slate-950 font-bold rounded-xl focus:ring-cyan-500 focus:border-cyan-500 p-3 shadow-inner">
                                 <option value="Warga">Warga Biasa</option>
                                 <option value="Ketua RT">Ketua RT</option>
                                 <option value="Relawan">Relawan Siaga</option>
