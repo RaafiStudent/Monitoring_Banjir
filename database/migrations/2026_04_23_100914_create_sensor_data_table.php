@@ -13,10 +13,10 @@ return new class extends Migration
 {
     Schema::create('sensor_data', function (Blueprint $table) {
         $table->id();
-        $table->float('water_level'); // Data JSN-SR04T [cite: 235]
-        $table->string('rain_status'); // Data Raindrop [cite: 235]
-        $table->float('water_flow'); // Data Waterflow [cite: 235]
-        $table->string('status'); // Aman, Siaga, Bahaya [cite: 120]
+        $table->float('water_level'); // Data sensor JSN-SR04T [cite: 221]
+        $table->string('rain_status'); // Data sensor hujan [cite: 222]
+        $table->float('water_flow');  // Data sensor waterflow [cite: 223]
+        $table->string('status');      // Aman, Siaga, Bahaya [cite: 449]
         $table->timestamps();
     });
 }
