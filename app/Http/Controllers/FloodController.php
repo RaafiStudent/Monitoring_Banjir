@@ -4,45 +4,61 @@ namespace App\Http\Controllers;
 
 use App\Models\SensorData;
 use App\Models\Contact;
+use App\Models\Threshold;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache; // WAJIB TAMBAH INI UNTUK ANTI-SPAM
+use Illuminate\Support\Facades\Cache;
 
 class FloodController extends Controller
 {
-    // Tampilan Landing Page
+    /**
+     * Menampilkan Landing Page Publik.
+     */
     public function index()
     {
+        // Ambil data terbaru untuk Hero Section
         $latestData = SensorData::latest()->first();
+
+        // Ambil 6 data terakhir untuk Grafik Chart.js
         $historyData = SensorData::latest()->take(6)->get()->reverse();
 
         return view('dashboard', compact('latestData', 'historyData'));
     }
 
-    // FUNGSI PENERIMA DATA DARI IOT ESP32
+    /**
+     * Menerima transmisi data dari Alat IoT (ESP32).
+     * Jalur: POST /api/update-sensor
+     */
     public function storeApi(Request $request)
     {
+        // 1. Tangkap data ketinggian air dari request IoT
         $water_level = $request->water_level;
-        
-        // Logika Status
+
+        // 2. Ambil Ambang Batas dari Database secara dinamis
+        $threshold = Threshold::first();
+        $batasSiaga = $threshold ? $threshold->batas_siaga : 100; // Default 100 jika db kosong
+        $batasBahaya = $threshold ? $threshold->batas_bahaya : 150; // Default 150 jika db kosong
+
+        // 3. Tentukan Status berdasarkan Threshold dinamis
         $status = 'AMAN';
-        if ($water_level >= 100 && $water_level < 150) {
+        if ($water_level >= $batasSiaga && $water_level < $batasBahaya) {
             $status = 'SIAGA';
-        } elseif ($water_level >= 150) {
+        } elseif ($water_level >= $batasBahaya) {
             $status = 'BAHAYA';
         }
 
-        // Simpan ke Database
+        // 4. Simpan data sensor ke database
         $sensorData = SensorData::create([
             'water_level' => $water_level,
             'status' => $status,
+            // Tambahkan field lain jika alatmu mengirim data hujan/debit
+            'rain_status' => $request->rain_status ?? 'NORMAL',
+            'water_flow' => $request->water_flow ?? 0,
         ]);
 
-        // ==========================================
-        // LOGIKA BROADCAST WA OTOMATIS (15 MENIT)
-        // ==========================================
+        // 5. Logika Peringatan WhatsApp Otomatis (Anti-Spam 15 Menit)
         if ($status == 'BAHAYA') {
-            // Ambil ingatan sistem (Cache), kalau belum ada, set counter = 0
+            // Cek memori sistem (Cache)
             $broadcastMemory = Cache::get('bahaya_memory', [
                 'last_sent' => null, 
                 'counter' => 0
@@ -50,74 +66,78 @@ class FloodController extends Controller
 
             $shouldSendWa = false;
 
-            // Jika belum pernah kirim sama sekali
+            // Jika belum pernah kirim atau sudah lewat 15 menit dari kiriman terakhir
             if (is_null($broadcastMemory['last_sent'])) {
                 $shouldSendWa = true;
-            } 
-            // Jika sudah pernah kirim, cek apakah sudah lewat 15 menit?
-            else {
+            } else {
                 $minutesPassed = now()->diffInMinutes($broadcastMemory['last_sent']);
                 if ($minutesPassed >= 15) {
                     $shouldSendWa = true;
                 }
             }
 
-            // Eksekusi Kirim WA
+            // Eksekusi pengiriman jika memenuhi syarat
             if ($shouldSendWa) {
-                // Tambah hitungan pesan ke-berapa
                 $broadcastMemory['counter'] += 1;
                 $broadcastMemory['last_sent'] = now();
                 
-                // Simpan ingatan baru ke Cache (bertahan 24 jam)
+                // Simpan update memori ke Cache (berlaku 24 jam)
                 Cache::put('bahaya_memory', $broadcastMemory, now()->addHours(24));
 
-                // Panggil fungsi kirim WA di bawah
+                // Kirim Broadcast
                 $this->sendEmergencyBroadcast($water_level, $broadcastMemory['counter']);
             }
 
         } else {
-            // JIKA AIR SURUT (Bukan Bahaya Lagi), RESET INGATAN SISTEM KE 0
+            // JIKA STATUS TURUN (SURUT), Reset hitungan peringatan kembali ke 0
             if (Cache::has('bahaya_memory')) {
                 Cache::forget('bahaya_memory');
             }
         }
 
-        return response()->json(['message' => 'Data IoT berhasil diproses']);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data processed successfully',
+            'data' => [
+                'level' => $water_level,
+                'status' => $status
+            ]
+        ], 200);
     }
 
-    // FUNGSI KHUSUS KIRIM PESAN KE FONNTE
+    /**
+     * Fungsi Internal untuk mem-blast pesan ke WhatsApp Gateway (Fonnte).
+     */
     private function sendEmergencyBroadcast($level, $peringatanKe)
     {
-        // 1. Ambil semua nomor kontak (Warga & Petugas)
+        // Ambil semua nomor dari tabel kontak
         $contacts = Contact::pluck('phone_number')->toArray();
-        if(empty($contacts)) return; // Stop kalau belum ada nomor yg didaftarkan
+        if (empty($contacts)) return;
         
         $targetNumbers = implode(',', $contacts);
 
-        // 2. Format Pesan (Dibedakan antara pesan pertama dan pesan update)
+        // Bedakan pesan berdasarkan urutan (Peringatan pertama vs Update)
         if ($peringatanKe == 1) {
-            $pesan = "🚨 *PERINGATAN DINI BENCANA BANJIR* 🚨\n\n"
-                   . "Kepada Yth. Warga Desa Kaligangsa,\n"
-                   . "Sistem Pemantau Sungai mendeteksi luapan air pada level *BAHAYA*.\n\n"
-                   . "🌊 *Ketinggian Air saat ini:* {$level} cm\n"
-                   . "📍 *Lokasi:* Desa Kaligangsa\n\n"
-                   . "Mohon segera matikan aliran listrik, amankan dokumen penting, dan *segera menuju titik evakuasi* (Balai Desa Kaligangsa). Tim BPBD sedang meluncur ke lokasi.";
+            $pesan = "🚨 *PERINGATAN DINI BANJIR - DESA KALIGANGSA* 🚨\n\n"
+                   . "Sistem mendeteksi air pada level *BAHAYA*.\n"
+                   . "🌊 *Ketinggian Air:* {$level} cm\n\n"
+                   . "Warga diminta segera mematikan listrik dan mengevakuasi diri ke Balai Desa. Jangan menunggu air masuk ke rumah!";
         } else {
-            $pesan = "⚠️ *INFO UPDATE BANJIR (Peringatan ke-{$peringatanKe})* ⚠️\n\n"
-                   . "Air sungai masih terpantau pada level *BAHAYA*.\n"
-                   . "🌊 *Ketinggian Air saat ini:* {$level} cm\n\n"
-                   . "Bagi warga yang masih berada di rumah, harap segera mengevakuasi diri. Keselamatan jiwa adalah prioritas utama. \n\n"
-                   . "_Pesan ini dikirim secara otomatis oleh Sistem Pemantau Banjir BPBD Kota Tegal._";
+            $pesan = "⚠️ *UPDATE STATUS BANJIR (Pesan ke-{$peringatanKe})* ⚠️\n\n"
+                   . "Kondisi air sungai masih berada pada level *BAHAYA*.\n"
+                   . "🌊 *Ketinggian Air:* {$level} cm\n\n"
+                   . "Tetap waspada dan ikuti instruksi petugas BPBD di lapangan.";
         }
 
-        // 3. Eksekusi ke API Fonnte
-        $token_fonnte = 'TOKEN_WA_KAMU'; // Nanti ganti dengan token aslimu
+        // Token Fonnte (Silakan ganti dengan token aslimu dari dashboard fonnte.com)
+        $token_fonnte = 'TOKEN_WA_KAMU_DISINI'; 
 
         Http::withHeaders([
             'Authorization' => $token_fonnte,
         ])->post('https://api.fonnte.com/send', [
             'target' => $targetNumbers,
             'message' => $pesan,
+            'delay' => '2', // Jeda antar nomor agar tidak dianggap spam oleh WA
         ]);
     }
 }
