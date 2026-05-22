@@ -23,7 +23,7 @@
     <div x-show="open" @click="open = false" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-xs"></div>
 
     <div :class="open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'" 
-         class="fixed md:relative top-0 left-0 h-full md:h-auto w-1/2 md:w-full bg-slate-900 border-r border-slate-800 md:border-none p-5 md:p-6 space-y-2 md:space-y-3 transition-transform duration-300 ease-in-out md:block z-50 overflow-y-auto flex flex-col justify-between">
+         class="fixed md:relative top-0 left-0 h-full md:h-[calc(100dvh-89px)] w-1/2 md:w-full bg-slate-900 border-r border-slate-800 md:border-none p-5 md:p-6 transition-transform duration-300 ease-in-out md:flex flex-col justify-between z-50 overflow-y-auto">
          
          <div class="space-y-2 md:space-y-3">
              <div class="flex items-center justify-between md:hidden pb-3 border-b border-slate-800 mb-4 pt-2">
@@ -58,14 +58,11 @@
          </div>
 
          @if(auth()->check())
-             <div class="mt-auto pt-4 border-t border-slate-800 hidden md:block">
+             <div class="mt-auto pt-4 border-t border-slate-800 w-full block">
                  <div class="px-4 py-3 bg-slate-950 rounded-xl border border-slate-800/80 overflow-hidden">
                      <p class="font-bold text-white text-xs truncate">{{ auth()->user()->name }}</p>
                      <p class="text-[10px] text-slate-500 truncate mt-0.5">{{ auth()->user()->email }}</p>
                  </div>
-                 <a href="{{ route('profile.edit') }}" class="block text-center mt-2 p-1 text-[11px] font-medium text-slate-500 hover:text-white transition-colors">
-                     Pengaturan Profil
-                 </a>
              </div>
          @endif
     </div>
