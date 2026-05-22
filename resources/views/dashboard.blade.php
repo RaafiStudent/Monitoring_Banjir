@@ -69,6 +69,20 @@
                         </div>
                     </div>
 
+                    <div class="bg-white rounded-[1.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-6 flex items-center gap-5">
+                        <div class="w-14 h-14 bg-indigo-50 rounded-xl text-indigo-500 flex items-center justify-center shrink-0">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 15h18M5 15a4 4 0 01-4-4 4 4 0 014-4h.5a5.5 5.5 0 0110.6 0H17a4 4 0 014 4 4 4 0 01-4 4m-4 4v-4m-4 4v-4m8 4v-4"></path></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Curah Hujan</p>
+                            <div class="flex items-end gap-2 mt-1">
+                                <h3 id="rain-value-display" class="text-4xl font-black text-slate-800 leading-none">0</h3>
+                                <span class="text-sm font-bold text-slate-400 mb-1">mm/jam</span>
+                            </div>
+                            <p id="rain-status-display" class="text-xs font-bold text-indigo-500 mt-1 uppercase tracking-widest bg-indigo-50 inline-block px-2 py-0.5 rounded-md">CERAH</p>
+                        </div>
+                    </div>
+
                     <div id="status-card" class="bg-gradient-to-br from-emerald-500 to-teal-500 rounded-[1.5rem] shadow-xl p-6 text-white relative overflow-hidden transition-all duration-500">
                         <svg class="absolute -right-4 -top-4 w-32 h-32 text-white/10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.83L19.17 19H4.83L12 5.83zM11 16h2v2h-2v-2zm0-7h2v5h-2V9z"/></svg>
                         <p class="text-white/80 text-xs font-bold uppercase tracking-wider mb-1 relative z-10">Status Terkini</p>
@@ -166,20 +180,27 @@
                     .then(data => {
                         if(!data.latest) return;
                         
-                        // 1. Update Angka Elevasi
+                        // 1. Update Angka Elevasi Air
                         document.getElementById('water-level-display').innerHTML = data.latest.water_level + ' <span class="text-lg font-bold text-slate-400">cm</span>';
                         
-                        // 2. Update Teks Status
+                        // 2. TAMBAHAN: Update Angka & Status Hujan secara Real-time
+                        if(data.latest.rain_value !== undefined) {
+                            document.getElementById('rain-value-display').innerText = data.latest.rain_value;
+                        }
+                        if(data.latest.rain_status !== undefined) {
+                            document.getElementById('rain-status-display').innerText = data.latest.rain_status;
+                        }
+
+                        // 3. Update Teks Status Bahaya
                         let statusText = data.latest.status.toUpperCase();
                         document.getElementById('badge-status-text').innerText = 'STATUS: ' + statusText;
                         document.getElementById('card-status-text').innerText = statusText;
                         
-                        // 3. Update Visual (Warna & Progress Bar)
+                        // 4. Update Visual Kotak Warna
                         let badge = document.getElementById('badge-status-container');
                         let card = document.getElementById('status-card');
                         let progress = document.getElementById('status-progress');
                         
-                        // Bersihkan class lama
                         badge.className = 'inline-flex items-center gap-2 px-6 py-2 rounded-full text-sm font-bold mb-8 transition-all duration-500 ';
                         card.className = 'rounded-[1.5rem] shadow-xl p-6 text-white relative overflow-hidden transition-all duration-500 ';
 
@@ -197,18 +218,18 @@
                             progress.style.width = '25%';
                         }
                         
-                        // 4. Update Waktu Sync
+                        // 5. Update Jam Sync Terakhir
                         let now = new Date();
                         document.getElementById('last-sync').innerText = 'Sinkronisasi terakhir: ' + now.toLocaleTimeString();
                         
-                        // 5. Update Grafik
+                        // 6. Update Grafik Bergerak
                         window.myChart.data.labels = data.history.map(item => item.time);
                         window.myChart.data.datasets[0].data = data.history.map(item => item.level);
                         window.myChart.update();
                     });
             }
 
-            // Jalankan setiap 3 detik
+            // Eksekusi setiap 3 detik
             fetchRealTimeData();
             setInterval(fetchRealTimeData, 3000);
         });
