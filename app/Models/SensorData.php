@@ -12,7 +12,8 @@ class SensorData extends Model
     // Ini adalah kunci agar tidak error MassAssignmentException
     protected $fillable = [
         'water_level',
-        'rain_status',
+        'rain_value',  // DITAMBAHKAN: Untuk menyimpan angka curah hujan
+        'rain_status', // DITAMBAHKAN: Untuk menyimpan teks status hujan
         'water_flow',
         'status'
     ];
