@@ -23,6 +23,21 @@ class FloodController extends Controller
     {
         $water_level = $request->water_level;
 
+        // --- TAMBAHAN FITUR HUJAN ---
+        // 1. Tangkap angka curah hujan (Default 0 jika alat IoT belum ngirim)
+        $rain_value = $request->rain_value ?? 0;
+
+        // 2. Tentukan Teks Status Hujan Otomatis berdasarkan Angka
+        $rain_status = 'CERAH';
+        if ($rain_value > 0 && $rain_value <= 10) {
+            $rain_status = 'GERIMIS';
+        } elseif ($rain_value > 10 && $rain_value <= 30) {
+            $rain_status = 'HUJAN SEDANG';
+        } elseif ($rain_value > 30) {
+            $rain_status = 'HUJAN LEBAT';
+        }
+        // ----------------------------
+
         $threshold = Threshold::first();
         $batasSiaga = $threshold ? $threshold->batas_siaga : 100; 
         $batasBahaya = $threshold ? $threshold->batas_bahaya : 150; 
@@ -34,10 +49,12 @@ class FloodController extends Controller
             $status = 'BAHAYA';
         }
 
+        // Simpan semua data ke database (Termasuk data hujan)
         $sensorData = SensorData::create([
             'water_level' => $water_level,
             'status' => $status,
-            'rain_status' => $request->rain_status ?? 'NORMAL',
+            'rain_value' => $rain_value,     // Disimpan ke DB
+            'rain_status' => $rain_status,   // Disimpan ke DB
             'water_flow' => $request->water_flow ?? 0,
         ]);
 
@@ -78,7 +95,9 @@ class FloodController extends Controller
             'message' => 'Data processed successfully',
             'data' => [
                 'level' => $water_level,
-                'status' => $status
+                'status' => $status,
+                'rain_value' => $rain_value,
+                'rain_status' => $rain_status
             ]
         ], 200);
     }
@@ -113,9 +132,6 @@ class FloodController extends Controller
         ]);
     }
 
-    /**
-     * Endpoint untuk menarik data terbaru ke layar secara Real-time (AJAX)
-     */
     public function getLatestData()
     {
         $latest = SensorData::latest()->first();
