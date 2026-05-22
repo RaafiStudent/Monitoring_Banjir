@@ -22,13 +22,7 @@
             <div class="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-950 relative">
                 
                 <div class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 h-[60px] md:h-[89px] shrink-0 flex items-center justify-end px-6 sm:px-8">
-                    @if(auth()->check())
-                        <div class="text-right hidden sm:block">
-                            <p class="font-bold text-white text-sm">{{ auth()->user()->name }}</p>
-                            <p class="text-[10px] text-slate-500">{{ auth()->user()->email }}</p>
-                        </div>
-                    @endif
-                </div>
+                    </div>
 
                 @isset($header)
                     <header class="bg-slate-900 border-b border-slate-800 shadow shrink-0 relative z-20">
