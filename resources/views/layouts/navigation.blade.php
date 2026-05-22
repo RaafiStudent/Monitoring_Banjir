@@ -1,7 +1,7 @@
-<nav x-data="{ open: false }" class="bg-slate-900 border-b border-slate-800 md:border-b-0 md:border-r md:w-[300px] w-full shrink-0 flex flex-col relative z-30">
+<nav x-data="{ open: false }" class="bg-slate-900 border-b border-slate-800 md:border-b-0 md:border-r md:w-[300px] w-full shrink-0 flex flex-col md:h-screen md:overflow-y-auto relative z-30">
     
     <div class="flex flex-col w-full">
-        <div class="flex items-center justify-between px-8 py-6 border-b border-slate-800">
+        <div class="flex items-center justify-between px-8 py-6 border-b border-slate-800 shrink-0">
             <div class="flex items-center gap-4">
                 <div class="w-10 h-10 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center border border-cyan-500/20 font-black text-base shadow-[0_0_15px_rgba(34,211,238,0.1)]">
                     EWS

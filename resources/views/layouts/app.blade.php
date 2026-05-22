@@ -13,15 +13,15 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
-    <body class="font-sans antialiased text-slate-300 bg-slate-950">
+    <body class="font-sans antialiased text-slate-300 bg-slate-950 overflow-hidden">
         
-        <div class="min-h-screen flex flex-col md:flex-row bg-slate-950">
+        <div class="h-screen flex flex-col md:flex-row bg-slate-950">
             
             @include('layouts.navigation')
 
-            <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
                 
-                <div class="bg-slate-900 border-b border-slate-800 h-[89px] flex items-center justify-end px-6 sm:px-8 relative z-20">
+                <div class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 h-[89px] shrink-0 flex items-center justify-end px-6 sm:px-8">
                     <div class="flex items-center gap-6">
                         @if(auth()->check())
                             <div class="text-right hidden sm:block">
@@ -43,14 +43,14 @@
                 </div>
 
                 @isset($header)
-                    <header class="bg-slate-900 border-b border-slate-800 shadow relative z-20">
+                    <header class="bg-slate-900 border-b border-slate-800 shadow shrink-0 relative z-20">
                         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>
                     </header>
                 @endisset
 
-                <main class="flex-1 overflow-y-auto relative">
+                <main class="flex-1 relative pb-12">
                     {{ $slot }}
                 </main>
             </div>
