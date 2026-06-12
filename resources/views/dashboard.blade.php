@@ -14,7 +14,7 @@
             
             <h1 class="text-5xl md:text-7xl lg:text-[6.5rem] font-black tracking-tight leading-[1.1] mb-8 text-white">
                 Sistem Peringatan <br>
-                <span class="text-cyan-400 text-glow block mt-2">Banjir Kaligangsa</span>
+                <span class="text-cyan-400 text-glow block mt-2">Banjir Di Kaligangsa</span>
             </h1>
             
             <p class="text-lg lg:text-xl text-slate-400 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
