@@ -8,6 +8,8 @@ use App\Models\Threshold;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class FloodController extends Controller
 {
@@ -106,6 +108,25 @@ class FloodController extends Controller
             ]
         ], 200);
     }
+
+    public function exportPdf()
+{
+    // 1. Sistem mengambil data monitoring yang tersimpan pada basis data
+    $data = SensorData::orderBy('created_at', 'desc')->get();
+
+    // 2. Tahap Percabangan (Decision): Sistem memeriksa ketersediaan data
+    if ($data->isEmpty()) {
+        // JIKA TIDAK TERSEDIA: Sistem menampilkan pesan bahwa laporan tidak dapat dibuat
+        return redirect()->back()->with('error', 'Laporan gagal diekspor: Data monitoring saat ini tidak tersedia atau kosong.');
+    }
+
+    // JIKA TERSEDIA: Sistem membuat dokumen PDF dan menampilkan hasil laporan
+    // Kita mengirim variabel $data ke dalam file desain PDF
+    $pdf = Pdf::loadView('admin.laporan_pdf', compact('data'));
+
+    // 3. Mengunduh file PDF ke perangkat pengguna
+    return $pdf->download('Laporan-Monitoring-Banjir-Kaligangsa.pdf');
+}
 
     private function sendEmergencyBroadcast($level, $peringatanKe)
     {
