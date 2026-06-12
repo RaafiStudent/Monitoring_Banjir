@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Threshold extends Model
 {
     use HasFactory;
-    protected $fillable = ['batas_siaga', 'batas_bahaya'];
+    // Tambahkan batas_waspada
+    protected $fillable = ['batas_waspada', 'batas_siaga', 'batas_bahaya'];
 }
