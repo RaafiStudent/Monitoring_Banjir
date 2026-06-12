@@ -18,7 +18,7 @@
             </h1>
             
             <p class="text-lg lg:text-xl text-slate-400 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
-                Platform monitoring data ketinggian air real-time untuk perencanaan dan penanggulangan potensi banjir.
+                Platform monitoring data ketinggian air real-time untuk perencanaan dan pengembangan mitigasi potensi banjir.
             </p>
             
             <div class="flex flex-col sm:flex-row justify-center items-center gap-5 mb-12">
@@ -138,12 +138,13 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Inisialisasi Chart
-            const ctx = document.getElementById('chart').getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, "rgba(34, 211, 238, 0.4)"); 
-            gradient.addColorStop(1, "rgba(34, 211, 238, 0.0)");   
+            // Variabel global untuk menampung threshold dari database
+            window.batasWaspada = 50;
+            window.batasSiaga = 100;
+            window.batasBahaya = 150;
 
+            const ctx = document.getElementById('chart').getContext('2d');
+            
             window.myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -151,15 +152,22 @@
                     datasets: [{
                         label: 'Elevasi (cm)',
                         data: [], 
-                        borderColor: '#22d3ee', 
-                        backgroundColor: gradient,
                         borderWidth: 4, 
                         pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#22d3ee',
                         pointBorderWidth: 3,
                         pointRadius: 5, 
-                        fill: true,
-                        tension: 0.4
+                        fill: false, // Dimatikan agar warna garis lebih menonjol
+                        tension: 0.4,
+                        // LOGIKA PERUBAHAN WARNA GARIS BERDASARKAN STATUS AIR
+                        segment: {
+                            borderColor: ctx => {
+                                const val = ctx.p1.parsed.y; // Mengambil nilai ketinggian air di titik tersebut
+                                if (val >= window.batasBahaya) return '#f43f5e'; // Merah (BAHAYA)
+                                if (val >= window.batasSiaga) return '#f97316'; // Oranye (SIAGA)
+                                if (val >= window.batasWaspada) return '#eab308'; // Kuning (WASPADA)
+                                return '#10b981'; // Hijau (AMAN)
+                            }
+                        }
                     }]
                 },
                 options: {
@@ -180,10 +188,17 @@
                     .then(data => {
                         if(!data.latest) return;
                         
+                        // Update Threshold dari Database
+                        if(data.thresholds) {
+                            window.batasWaspada = data.thresholds.batas_waspada;
+                            window.batasSiaga = data.thresholds.batas_siaga;
+                            window.batasBahaya = data.thresholds.batas_bahaya;
+                        }
+
                         // 1. Update Angka Elevasi Air
                         document.getElementById('water-level-display').innerHTML = data.latest.water_level + ' <span class="text-lg font-bold text-slate-400">cm</span>';
                         
-                        // 2. TAMBAHAN: Update Angka & Status Hujan secara Real-time
+                        // 2. Update Angka & Status Hujan
                         if(data.latest.rain_value !== undefined) {
                             document.getElementById('rain-value-display').innerText = data.latest.rain_value;
                         }
@@ -191,7 +206,7 @@
                             document.getElementById('rain-status-display').innerText = data.latest.rain_status;
                         }
 
-                        // 3. Update Teks Status Bahaya
+                        // 3. Update Teks Status
                         let statusText = data.latest.status.toUpperCase();
                         document.getElementById('badge-status-text').innerText = 'STATUS: ' + statusText;
                         document.getElementById('card-status-text').innerText = statusText;
@@ -209,9 +224,13 @@
                             card.classList.add('bg-gradient-to-br', 'from-rose-500', 'to-rose-700', 'shadow-rose-500/30');
                             progress.style.width = '100%';
                         } else if (statusText === 'SIAGA') {
-                            badge.classList.add('bg-amber-500', 'text-slate-900', 'shadow-[0_0_20px_rgba(245,158,11,0.5)]');
-                            card.classList.add('bg-gradient-to-br', 'from-amber-500', 'to-orange-600', 'shadow-orange-500/30');
-                            progress.style.width = '65%';
+                            badge.classList.add('bg-orange-500', 'text-white', 'shadow-[0_0_20px_rgba(249,115,22,0.5)]');
+                            card.classList.add('bg-gradient-to-br', 'from-orange-500', 'to-orange-700', 'shadow-orange-500/30');
+                            progress.style.width = '75%';
+                        } else if (statusText === 'WASPADA') {
+                            badge.classList.add('bg-amber-400', 'text-slate-900', 'shadow-[0_0_20px_rgba(251,191,36,0.5)]');
+                            card.classList.add('bg-gradient-to-br', 'from-amber-400', 'to-yellow-600', 'shadow-amber-500/30');
+                            progress.style.width = '50%';
                         } else {
                             badge.classList.add('bg-emerald-400', 'text-slate-900', 'shadow-[0_0_20px_rgba(52,211,153,0.5)]');
                             card.classList.add('bg-gradient-to-br', 'from-emerald-500', 'to-teal-500', 'shadow-emerald-500/30');
