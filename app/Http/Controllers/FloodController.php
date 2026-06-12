@@ -39,14 +39,19 @@ class FloodController extends Controller
         // ----------------------------
 
         $threshold = Threshold::first();
+        // Default value jika belum di-set di database
+        $batasWaspada = $threshold ? $threshold->batas_waspada : 50; 
         $batasSiaga = $threshold ? $threshold->batas_siaga : 100; 
         $batasBahaya = $threshold ? $threshold->batas_bahaya : 150; 
 
+        // Penentuan 4 Status
         $status = 'AMAN';
-        if ($water_level >= $batasSiaga && $water_level < $batasBahaya) {
-            $status = 'SIAGA';
-        } elseif ($water_level >= $batasBahaya) {
+        if ($water_level >= $batasBahaya) {
             $status = 'BAHAYA';
+        } elseif ($water_level >= $batasSiaga) {
+            $status = 'SIAGA';
+        } elseif ($water_level >= $batasWaspada) {
+            $status = 'WASPADA';
         }
 
         // Simpan semua data ke database (Termasuk data hujan)
@@ -121,7 +126,7 @@ class FloodController extends Controller
                    . "Tetap waspada dan ikuti instruksi petugas BPBD di lapangan.";
         }
 
-        $token_fonnte = 'TOKEN_WA_KAMU_DISINI'; 
+        $token_fonnte = env('FONNTE_TOKEN', 'TOKEN_WA_KAMU_DISINI'); 
 
         Http::withHeaders([
             'Authorization' => $token_fonnte,
@@ -136,9 +141,11 @@ class FloodController extends Controller
     {
         $latest = SensorData::latest()->first();
         $history = SensorData::latest()->take(6)->get()->reverse()->values();
+        $thresholds = Threshold::first(); // Ambil data ambang batas
 
         return response()->json([
             'latest' => $latest,
+            'thresholds' => $thresholds, // Kirim ke frontend
             'history' => $history->map(function($item) {
                 return [
                     'time' => \Carbon\Carbon::parse($item->created_at)->format('H:i:s'),
