@@ -26,29 +26,39 @@
                 </div>
 
                 <form action="{{ route('threshold.update') }}" method="POST">
-                    @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-                        <div>
-                            <label class="block text-amber-500 text-xs font-bold uppercase tracking-widest mb-2">Level Siaga</label>
-                            <div class="relative">
-                                <input type="number" name="batas_siaga" value="{{ $threshold->batas_siaga }}" required class="w-full bg-white border-2 border-slate-200 text-slate-950 font-black text-xl rounded-xl focus:ring-amber-500 focus:border-amber-500 p-3 pl-4 pr-12 shadow-inner text-center">
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">CM</span>
-                            </div>
-                        </div>
+    @csrf
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        
+        <div>
+            <label class="block text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Level Waspada</label>
+            <div class="relative">
+                <input type="number" name="batas_waspada" value="{{ $threshold->batas_waspada }}" required class="w-full bg-white border-2 border-slate-200 text-slate-950 font-black text-xl rounded-xl focus:ring-amber-400 focus:border-amber-400 p-3 pl-4 pr-12 shadow-inner text-center">
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">CM</span>
+            </div>
+        </div>
 
-                        <div>
-                            <label class="block text-rose-500 text-xs font-bold uppercase tracking-widest mb-2">Level Bahaya</label>
-                            <div class="relative">
-                                <input type="number" name="batas_bahaya" value="{{ $threshold->batas_bahaya }}" required class="w-full bg-white border-2 border-slate-200 text-slate-950 font-black text-xl rounded-xl focus:ring-rose-500 focus:border-rose-500 p-3 pl-4 pr-12 shadow-inner text-center">
-                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">CM</span>
-                            </div>
-                        </div>
-                    </div>
+        <div>
+            <label class="block text-orange-500 text-xs font-bold uppercase tracking-widest mb-2">Level Siaga</label>
+            <div class="relative">
+                <input type="number" name="batas_siaga" value="{{ $threshold->batas_siaga }}" required class="w-full bg-white border-2 border-slate-200 text-slate-950 font-black text-xl rounded-xl focus:ring-orange-500 focus:border-orange-500 p-3 pl-4 pr-12 shadow-inner text-center">
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">CM</span>
+            </div>
+        </div>
 
-                    <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-black py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] text-base tracking-wide">
-                        SIMPAN PERUBAHAN
-                    </button>
-                </form>
+        <div>
+            <label class="block text-rose-500 text-xs font-bold uppercase tracking-widest mb-2">Level Bahaya</label>
+            <div class="relative">
+                <input type="number" name="batas_bahaya" value="{{ $threshold->batas_bahaya }}" required class="w-full bg-white border-2 border-slate-200 text-slate-950 font-black text-xl rounded-xl focus:ring-rose-500 focus:border-rose-500 p-3 pl-4 pr-12 shadow-inner text-center">
+                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">CM</span>
+            </div>
+        </div>
+
+    </div>
+    
+    <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-black py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] text-base tracking-wide">
+        SIMPAN PERUBAHAN
+    </button>
+</form>
             </div>
         </div>
     </div>
