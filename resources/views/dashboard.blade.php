@@ -18,7 +18,7 @@
             </h1>
             
             <p class="text-lg lg:text-xl text-slate-400 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
-                Platform monitoring data ketinggian air real-time untuk perencanaan dan pengembangan mitigasi potensi banjir.
+                Platform monitoring data ketinggian air real-time untuk perencanaan dan penanggulangan potensi banjir.
             </p>
             
             <div class="flex flex-col sm:flex-row justify-center items-center gap-5 mb-12">
@@ -156,9 +156,9 @@
                         pointBackgroundColor: '#ffffff',
                         pointBorderWidth: 3,
                         pointRadius: 5, 
-                        fill: false, // Dimatikan agar warna garis lebih menonjol
+                        fill: false, // Dimatikan agar warna garis warna-warni lebih menonjol
                         tension: 0.4,
-                        // LOGIKA PERUBAHAN WARNA GARIS BERDASARKAN STATUS AIR
+                        // LOGIKA PERUBAHAN WARNA GARIS BERDASARKAN STATUS AIR TINGKAT DEWA
                         segment: {
                             borderColor: ctx => {
                                 const val = ctx.p1.parsed.y; // Mengambil nilai ketinggian air di titik tersebut
@@ -181,7 +181,7 @@
                 }
             });
 
-            // MESIN AUTO-REFRESH
+            // MESIN AUTO-REFRESH & UPDATE TAMPILAN
             function fetchRealTimeData() {
                 fetch("{{ route('api.latest_data') }}")
                     .then(response => response.json())
@@ -211,7 +211,7 @@
                         document.getElementById('badge-status-text').innerText = 'STATUS: ' + statusText;
                         document.getElementById('card-status-text').innerText = statusText;
                         
-                        // 4. Update Visual Kotak Warna
+                        // 4. Update Visual Kotak Warna Menjadi 4 Kondisi (Aman, Waspada, Siaga, Bahaya)
                         let badge = document.getElementById('badge-status-container');
                         let card = document.getElementById('status-card');
                         let progress = document.getElementById('status-progress');
@@ -232,6 +232,7 @@
                             card.classList.add('bg-gradient-to-br', 'from-amber-400', 'to-yellow-600', 'shadow-amber-500/30');
                             progress.style.width = '50%';
                         } else {
+                            // Default untuk AMAN
                             badge.classList.add('bg-emerald-400', 'text-slate-900', 'shadow-[0_0_20px_rgba(52,211,153,0.5)]');
                             card.classList.add('bg-gradient-to-br', 'from-emerald-500', 'to-teal-500', 'shadow-emerald-500/30');
                             progress.style.width = '25%';
@@ -241,14 +242,14 @@
                         let now = new Date();
                         document.getElementById('last-sync').innerText = 'Sinkronisasi terakhir: ' + now.toLocaleTimeString();
                         
-                        // 6. Update Grafik Bergerak
+                        // 6. Update Grafik Bergerak dan Render Ulang
                         window.myChart.data.labels = data.history.map(item => item.time);
                         window.myChart.data.datasets[0].data = data.history.map(item => item.level);
                         window.myChart.update();
                     });
             }
 
-            // Eksekusi setiap 3 detik
+            // Eksekusi data setiap 3 detik
             fetchRealTimeData();
             setInterval(fetchRealTimeData, 3000);
         });

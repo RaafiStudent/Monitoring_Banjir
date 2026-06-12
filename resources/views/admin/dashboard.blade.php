@@ -11,10 +11,42 @@
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10">
             
+            @if(session('error'))
+                <div id="toast-error" class="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-[99999] w-[90%] max-w-md bg-slate-900 rounded-[1.5rem] shadow-[0_20px_50px_rgba(244,63,94,0.5)] border border-rose-500/50 overflow-hidden animate-[bounce_1s_ease-in-out_infinite]">
+                    <div class="p-5 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-rose-500/20 rounded-xl flex justify-center items-center shrink-0">
+                            <svg class="w-7 h-7 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-black text-white uppercase tracking-wider mb-1">Akses Ditolak</h4>
+                            <p class="text-xs font-bold text-slate-400 leading-relaxed">{{ session('error') }}</p>
+                        </div>
+                        <button onclick="document.getElementById('toast-error').style.display='none'" class="w-8 h-8 flex justify-center items-center rounded-lg bg-slate-800 text-slate-400 hover:bg-rose-500 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-800">
+                        <div class="h-full bg-rose-500 w-full animate-[shrink_3s_linear_forwards]"></div>
+                    </div>
+                </div>
+
+                <script>
+                    setTimeout(() => {
+                        let toast = document.getElementById('toast-error');
+                        if(toast) { toast.style.opacity = '0'; setTimeout(() => toast.style.display = 'none', 500); }
+                    }, 4000);
+                </script>
+                
+                <style>
+                    @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+                </style>
+            @endif
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                 <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 p-6 rounded-[2rem] shadow-2xl">
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Elevasi Saat Ini</p>
-                    <h3 class="text-4xl font-black text-white">{{ $latestData->water_level }} <span class="text-sm text-cyan-400">cm</span></h3>
+                    <h3 class="text-4xl font-black text-white">{{ $latestData->water_level ?? 0 }} <span class="text-sm text-cyan-400">cm</span></h3>
                     <div class="mt-4 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full animate-pulse bg-cyan-400"></span>
                         <span class="text-[10px] font-bold text-cyan-400 uppercase">Real-time Sync</span>
@@ -23,21 +55,21 @@
 
                 <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 p-6 rounded-[2rem] shadow-2xl">
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Status Sistem</p>
-                    <h3 class="text-2xl font-black {{ $latestData->status == 'BAHAYA' ? 'text-rose-500' : ($latestData->status == 'SIAGA' ? 'text-amber-500' : 'text-emerald-400') }}">
-                        {{ strtoupper($latestData->status) }}
+                    <h3 class="text-2xl font-black {{ ($latestData->status ?? 'AMAN') == 'BAHAYA' ? 'text-rose-500' : (($latestData->status ?? 'AMAN') == 'SIAGA' ? 'text-orange-500' : (($latestData->status ?? 'AMAN') == 'WASPADA' ? 'text-yellow-500' : 'text-emerald-400')) }}">
+                        {{ strtoupper($latestData->status ?? 'AMAN') }}
                     </h3>
-                    <p class="text-[10px] text-slate-500 mt-4">Diperbarui: {{ \Carbon\Carbon::parse($latestData->created_at)->format('H:i:s') }}</p>
+                    <p class="text-[10px] text-slate-500 mt-4">Diperbarui: {{ isset($latestData) ? \Carbon\Carbon::parse($latestData->created_at)->format('H:i:s') : '-' }}</p>
                 </div>
 
                 <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 p-6 rounded-[2rem] shadow-2xl">
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Insiden Bahaya</p>
-                    <h3 class="text-4xl font-black text-rose-500">{{ $stats['danger_count'] }} <span class="text-sm text-slate-500">Record</span></h3>
+                    <h3 class="text-4xl font-black text-rose-500">{{ $stats['danger_count'] ?? 0 }} <span class="text-sm text-slate-500">Record</span></h3>
                     <p class="text-[10px] text-slate-500 mt-4">Total kumulatif status awas.</p>
                 </div>
 
                 <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 p-6 rounded-[2rem] shadow-2xl">
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Total Log Sensor</p>
-                    <h3 class="text-4xl font-black text-cyan-400">{{ $stats['total_logs'] }}</h3>
+                    <h3 class="text-4xl font-black text-cyan-400">{{ $stats['total_logs'] ?? 0 }}</h3>
                     <p class="text-[10px] text-slate-500 mt-4">Database: MySQL Terintegrasi</p>
                 </div>
             </div>
@@ -48,10 +80,12 @@
                         <h3 class="text-xl font-bold text-white">Log Riwayat Sensor</h3>
                         <p class="text-slate-500 text-sm mt-1">Data digital yang dikirimkan oleh ESP32-DEVKIT Nabila.</p>
                     </div>
-                    <div class="flex gap-3">
-                        <button class="bg-white hover:bg-slate-200 text-slate-950 px-6 py-2.5 rounded-xl text-sm font-bold transition-all transform hover:-translate-y-1 shadow-lg">
+                    <div class="flex flex-wrap gap-3">
+                        
+                        <a href="{{ route('admin.export.pdf') }}" class="inline-block text-center bg-white hover:bg-slate-200 text-slate-950 px-6 py-2.5 rounded-xl text-sm font-bold transition-all transform hover:-translate-y-1 shadow-lg cursor-pointer">
                             Ekspor PDF
-                        </button>
+                        </a>
+                        
                         <button class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)]">
                             Kirim Broadcast WA
                         </button>
@@ -69,7 +103,7 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-800/50">
-                            @forelse($logs as $log)
+                            @forelse($logs ?? [] as $log)
                             <tr class="hover:bg-white/5 transition-all group">
                                 <td class="px-8 py-6 text-sm text-slate-300 font-medium">
                                     {{ \Carbon\Carbon::parse($log->created_at)->format('d/m/Y') }} 
@@ -82,7 +116,9 @@
                                 <td class="px-8 py-6 text-center">
                                     <span class="px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest border
                                         {{ $log->status == 'BAHAYA' ? 'bg-rose-500/10 text-rose-500 border-rose-500/20' : 
-                                           (in_array($log->status, ['SIAGA', 'SIAGA 2']) ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20') }}">
+                                           ($log->status == 'SIAGA' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' : 
+                                           ($log->status == 'WASPADA' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' : 
+                                           'bg-emerald-500/10 text-emerald-500 border-emerald-500/20')) }}">
                                         {{ strtoupper($log->status) }}
                                     </span>
                                 </td>
@@ -104,7 +140,7 @@
                 </div>
 
                 <div class="p-6 bg-slate-900/20 border-t border-slate-800">
-                    {{ $logs->links() }}
+                    {{ isset($logs) ? $logs->links() : '' }}
                 </div>
             </div>
         </div>
