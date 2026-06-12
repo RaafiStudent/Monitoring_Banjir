@@ -14,7 +14,13 @@ Route::get('/api/latest-data', [FloodController::class, 'getLatestData'])->name(
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Rute Fitur Ekspor & Broadcast
     Route::get('/admin/laporan/export-pdf', [FloodController::class, 'exportPdf'])->name('admin.export.pdf');
+    Route::get('/admin/broadcast/manual', [FloodController::class, 'manualBroadcast'])->name('admin.broadcast.manual');
+    Route::get('/admin/warning/toggle', [FloodController::class, 'toggleWarning'])->name('admin.warning.toggle');
+    
+    // Rute Manajemen Kontak & Threshold
     Route::get('/contacts', [ContactController::class, 'index'])->name('contacts.index');
     Route::post('/contacts', [ContactController::class, 'store'])->name('contacts.store');
     Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy');

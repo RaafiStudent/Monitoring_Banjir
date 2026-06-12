@@ -24,11 +24,10 @@ class FloodController extends Controller
     {
         $water_level = $request->water_level;
 
-        // --- TAMBAHAN FITUR HUJAN ---
-        // 1. Tangkap angka curah hujan (Default 0 jika alat IoT belum ngirim)
+        // Tangkap angka curah hujan (Default 0 jika alat IoT belum ngirim)
         $rain_value = $request->rain_value ?? 0;
 
-        // 2. Tentukan Teks Status Hujan Otomatis berdasarkan Angka
+        // Tentukan Teks Status Hujan Otomatis berdasarkan Angka
         $rain_status = 'CERAH';
         if ($rain_value > 0 && $rain_value <= 10) {
             $rain_status = 'GERIMIS';
@@ -37,7 +36,6 @@ class FloodController extends Controller
         } elseif ($rain_value > 30) {
             $rain_status = 'HUJAN LEBAT';
         }
-        // ----------------------------
 
         $threshold = Threshold::first();
         // Default value jika belum di-set di database
@@ -59,12 +57,16 @@ class FloodController extends Controller
         $sensorData = SensorData::create([
             'water_level' => $water_level,
             'status' => $status,
-            'rain_value' => $rain_value,     // Disimpan ke DB
-            'rain_status' => $rain_status,   // Disimpan ke DB
+            'rain_value' => $rain_value,     
+            'rain_status' => $rain_status,   
             'water_flow' => $request->water_flow ?? 0,
         ]);
 
-        if ($status == 'BAHAYA') {
+        // CEK STATUS SAKLAR: Apakah Peringatan Dini sedang diaktifkan oleh Admin?
+        $isWarningActive = Cache::get('is_warning_active', true);
+
+        // Hanya kirim WA Otomatis jika status BAHAYA dan Saklar AKTIF
+        if ($status == 'BAHAYA' && $isWarningActive) {
             $broadcastMemory = Cache::get('bahaya_memory', [
                 'last_sent' => null, 
                 'counter' => 0
@@ -86,10 +88,8 @@ class FloodController extends Controller
                 $broadcastMemory['last_sent'] = now();
                 
                 Cache::put('bahaya_memory', $broadcastMemory, now()->addHours(24));
-
                 $this->sendEmergencyBroadcast($water_level, $broadcastMemory['counter']);
             }
-
         } else {
             if (Cache::has('bahaya_memory')) {
                 Cache::forget('bahaya_memory');
@@ -108,25 +108,67 @@ class FloodController extends Controller
         ], 200);
     }
 
+    // FUNGSI SAKLAR ON/OFF PERINGATAN DINI
+    public function toggleWarning()
+    {
+        $currentState = Cache::get('is_warning_active', true);
+        $newState = !$currentState; // Balikkan status
+        Cache::put('is_warning_active', $newState);
+
+        $pesan = $newState ? 'Sistem Peringatan Dini berhasil diaktifkan!' : 'Sistem Peringatan Dini berhasil dinonaktifkan sementara.';
+        return redirect(url()->previous() . '#monitoring')->with('success', $pesan);
+    }
+
+    // FUNGSI EKSPOR PDF DENGAN PERCABANGAN (DECISION)
     public function exportPdf()
     {
-        // 1. Sistem mengambil data monitoring yang tersimpan pada basis data
         $data = SensorData::orderBy('created_at', 'desc')->get();
 
-        // 2. Tahap Percabangan (Decision): Sistem memeriksa ketersediaan data
         if ($data->isEmpty()) {
-            // JIKA TIDAK TERSEDIA: Sistem menampilkan pesan (Arahkan dengan #monitoring agar halaman tidak lompat ke atas)
             return redirect(url()->previous() . '#monitoring')
                 ->with('error', 'Laporan gagal diekspor: Data monitoring saat ini tidak tersedia atau kosong.');
         }
 
-        // JIKA TERSEDIA: Sistem membuat dokumen PDF dan menampilkan hasil laporan
         $pdf = Pdf::loadView('admin.laporan_pdf', compact('data'));
-
-        // 3. Mengunduh file PDF ke perangkat pengguna
         return $pdf->download('Laporan-Monitoring-Banjir-Kaligangsa.pdf');
     }
 
+    // FUNGSI BROADCAST MANUAL ADMIN
+    public function manualBroadcast()
+    {
+        $latestData = SensorData::latest()->first();
+        $level = $latestData ? $latestData->water_level : 0;
+        
+        $contacts = Contact::pluck('phone_number')->toArray();
+        if (empty($contacts)) {
+            return redirect(url()->previous() . '#monitoring')->with('error', 'Gagal: Belum ada kontak terdaftar di sistem.');
+        }
+
+        $targetNumbers = implode(',', $contacts);
+        
+        $pesan = "📢 *INFORMASI BPBD KOTA TEGAL* 📢\n\n"
+               . "Pesan imbauan langsung dari Command Center.\n"
+               . "🌊 *Ketinggian Air Terkini:* {$level} cm\n\n"
+               . "Kondisi cuaca dan aliran air sedang dalam pantauan. Harap warga tetap waspada dan persiapkan langkah mitigasi mandiri.";
+
+        $token_fonnte = env('FONNTE_TOKEN', 'TOKEN_WA_KAMU_DISINI'); 
+
+        $response = Http::withHeaders([
+            'Authorization' => $token_fonnte,
+        ])->post('https://api.fonnte.com/send', [
+            'target' => $targetNumbers,
+            'message' => $pesan,
+            'delay' => '2',
+        ]);
+
+        if ($response->successful()) {
+            return redirect(url()->previous() . '#monitoring')->with('success', 'Broadcast WhatsApp berhasil dikirim ke seluruh kontak!');
+        } else {
+            return redirect(url()->previous() . '#monitoring')->with('error', 'Gagal mengirim WA: Periksa token API atau koneksi internet.');
+        }
+    }
+
+    // BROADCAST OTOMATIS
     private function sendEmergencyBroadcast($level, $peringatanKe)
     {
         $contacts = Contact::pluck('phone_number')->toArray();
@@ -161,11 +203,11 @@ class FloodController extends Controller
     {
         $latest = SensorData::latest()->first();
         $history = SensorData::latest()->take(6)->get()->reverse()->values();
-        $thresholds = Threshold::first(); // Ambil data ambang batas
+        $thresholds = Threshold::first(); 
 
         return response()->json([
             'latest' => $latest,
-            'thresholds' => $thresholds, // Kirim ke frontend
+            'thresholds' => $thresholds, 
             'history' => $history->map(function($item) {
                 return [
                     'time' => \Carbon\Carbon::parse($item->created_at)->format('H:i:s'),

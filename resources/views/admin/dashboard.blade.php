@@ -9,14 +9,14 @@
         <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-600 rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none"></div>
         <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-500 rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none"></div>
 
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10" id="monitoring">
             
             @if(session('error'))
                 <div id="toast-error" class="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-[99999] w-[90%] max-w-md bg-slate-900 rounded-[1.5rem] shadow-[0_20px_50px_rgba(244,63,94,0.5)] border border-rose-500/50 overflow-hidden animate-[bounce_1s_ease-in-out_infinite]">
                     <div class="p-5 flex items-center gap-4">
                         <div class="w-12 h-12 bg-rose-500/20 rounded-xl flex justify-center items-center shrink-0">
                             <svg class="w-7 h-7 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77-1.333.192 3 1.732 3z"></path>
                             </svg>
                         </div>
                         <div class="flex-1">
@@ -28,21 +28,47 @@
                         </button>
                     </div>
                     <div class="w-full h-1.5 bg-slate-800">
-                        <div class="h-full bg-rose-500 w-full animate-[shrink_3s_linear_forwards]"></div>
+                        <div class="h-full bg-rose-500 w-full animate-[shrink_4s_linear_forwards]"></div>
                     </div>
                 </div>
-
                 <script>
                     setTimeout(() => {
                         let toast = document.getElementById('toast-error');
                         if(toast) { toast.style.opacity = '0'; setTimeout(() => toast.style.display = 'none', 500); }
                     }, 4000);
                 </script>
-                
-                <style>
-                    @keyframes shrink { from { width: 100%; } to { width: 0%; } }
-                </style>
             @endif
+
+            @if(session('success'))
+                <div id="toast-success" class="fixed bottom-12 left-1/2 transform -translate-x-1/2 z-[99999] w-[90%] max-w-md bg-slate-900 rounded-[1.5rem] shadow-[0_20px_50px_rgba(16,185,129,0.5)] border border-emerald-500/50 overflow-hidden animate-[bounce_1s_ease-in-out_infinite]">
+                    <div class="p-5 flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-500/20 rounded-xl flex justify-center items-center shrink-0">
+                            <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-black text-white uppercase tracking-wider mb-1">Berhasil!</h4>
+                            <p class="text-xs font-bold text-slate-400 leading-relaxed">{{ session('success') }}</p>
+                        </div>
+                        <button onclick="document.getElementById('toast-success').style.display='none'" class="w-8 h-8 flex justify-center items-center rounded-lg bg-slate-800 text-slate-400 hover:bg-emerald-500 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-800">
+                        <div class="h-full bg-emerald-500 w-full animate-[shrink_4s_linear_forwards]"></div>
+                    </div>
+                </div>
+                <script>
+                    setTimeout(() => {
+                        let toast = document.getElementById('toast-success');
+                        if(toast) { toast.style.opacity = '0'; setTimeout(() => toast.style.display = 'none', 500); }
+                    }, 4000);
+                </script>
+            @endif
+
+            <style> @keyframes shrink { from { width: 100%; } to { width: 0%; } } </style>
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
                 <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-800 p-6 rounded-[2rem] shadow-2xl">
                     <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Elevasi Saat Ini</p>
@@ -75,20 +101,46 @@
             </div>
 
             <div class="bg-slate-900/40 backdrop-blur-2xl border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl">
-                <div class="p-8 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="p-8 border-b border-slate-800 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
                     <div>
                         <h3 class="text-xl font-bold text-white">Log Riwayat Sensor</h3>
                         <p class="text-slate-500 text-sm mt-1">Data digital yang dikirimkan oleh ESP32-DEVKIT Nabila.</p>
                     </div>
-                    <div class="flex flex-wrap gap-3">
+                    
+                    <div class="flex flex-wrap gap-3 items-center">
                         
-                        <a href="{{ route('admin.export.pdf') }}" class="inline-block text-center bg-white hover:bg-slate-200 text-slate-950 px-6 py-2.5 rounded-xl text-sm font-bold transition-all transform hover:-translate-y-1 shadow-lg cursor-pointer">
+                        @php $isWarningActive = \Illuminate\Support\Facades\Cache::get('is_warning_active', true); @endphp
+                        
+                        @if($isWarningActive)
+                            <div class="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-xs font-bold uppercase tracking-wider">
+                                <span class="relative flex h-2.5 w-2.5">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                                </span>
+                                Auto-Warning: AKTIF
+                            </div>
+                            <a href="{{ route('admin.warning.toggle') }}" onclick="return confirm('Yakin ingin MEMATIKAN sistem pengiriman peringatan otomatis?')" class="inline-block text-center bg-rose-500/20 hover:bg-rose-500 border border-rose-500/50 hover:border-rose-500 text-rose-400 hover:text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer">
+                                Matikan Peringatan
+                            </a>
+                        @else
+                            <div class="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl text-xs font-bold uppercase tracking-wider">
+                                <div class="w-2.5 h-2.5 rounded-full bg-rose-500"></div>
+                                Auto-Warning: NONAKTIF
+                            </div>
+                            <a href="{{ route('admin.warning.toggle') }}" class="inline-block text-center bg-emerald-500/20 hover:bg-emerald-500 border border-emerald-500/50 hover:border-emerald-500 text-emerald-400 hover:text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer">
+                                Aktifkan Peringatan
+                            </a>
+                        @endif
+
+                        <div class="w-px h-8 bg-slate-800 mx-1 hidden lg:block"></div> 
+
+                        <a href="{{ route('admin.export.pdf') }}" class="inline-block text-center bg-white hover:bg-slate-200 text-slate-950 px-5 py-2.5 rounded-xl text-sm font-bold transition-all transform hover:-translate-y-1 shadow-lg cursor-pointer">
                             Ekspor PDF
                         </a>
                         
-                        <button class="bg-cyan-500 hover:bg-cyan-600 text-slate-950 px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)]">
-                            Kirim Broadcast WA
-                        </button>
+                        <a href="{{ route('admin.broadcast.manual') }}" onclick="return confirm('Kirim Pesan Broadcast Waspada ke seluruh warga sekarang?')" class="inline-block text-center bg-cyan-500 hover:bg-cyan-600 text-slate-950 px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] cursor-pointer">
+                            Manual WA
+                        </a>
                     </div>
                 </div>
 
