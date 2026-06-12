@@ -7,14 +7,16 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up(): void
-    {
-        Schema::create('thresholds', function (Blueprint $table) {
-            $table->id();
-            $table->integer('batas_siaga')->default(100);
-            $table->integer('batas_bahaya')->default(150);
-            $table->timestamps();
-        });
-    }
+{
+    Schema::create('thresholds', function (Blueprint $table) {
+        $table->id();
+        $table->integer('batas_waspada')->default(50); // Tambahan baru
+        $table->integer('batas_siaga')->default(100);
+        $table->integer('batas_bahaya')->default(150);
+        $table->timestamps();
+    });
+}
+
 
     public function down(): void
     {
